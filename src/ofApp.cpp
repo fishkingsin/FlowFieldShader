@@ -2,6 +2,8 @@
 
 //--------------------------------------------------------------
 void ofApp::setup(){
+	ofDisableArbTex();
+	ofEnableAlphaBlending();
 	ofSetLogLevel(OF_LOG_VERBOSE);
 	
 	shaderA.load("shaders/bufferA");
@@ -27,11 +29,7 @@ void ofApp::setup(){
 //--------------------------------------------------------------
 void ofApp::update(){
 	float dt = 1.0 / max(ofGetFrameRate(), 1.f); // more smooth as 'real' deltaTime.
-	fboBufferB.begin();
-	ofFill();
-	ofSetColor(255,255,255, 5);
-	ofDrawRectangle(0, 0, densityWidth, densityHeight);
-	fboBufferB.end();
+	
 	// apply noiseshader to fbo
 	fboBufferA.begin();
 	shaderA.begin();
@@ -40,9 +38,8 @@ void ofApp::update(){
 	shaderA.setUniform1f("texCoordHeightScale", densityHeight);
 	shaderA.setUniform1f("iTime", ofGetElapsedTimef());
 	shaderA.setUniform1i("iFrame", ofGetFrameNum());
-	shaderA.setUniformTexture("tex0", fboImage.getTexture() , 1 );
-	shaderA.setUniformTexture("tex1", fboBufferA.getTexture() , 2);
-	shaderA.setUniformTexture("tex2", fboBufferB.getTexture() , 3);
+	shaderA.setUniformTexture("tex0", fboBufferA.getTexture() , 1);
+	shaderA.setUniformTexture("tex1", fboBufferB.getTexture() , 2);
 	fboImage.draw(0 ,0);
 	shaderA.end();
 	
@@ -50,16 +47,16 @@ void ofApp::update(){
 	
 	fboBufferB.begin();
 	shaderB.begin();
+	shaderB.setUniformTexture("tex0", fboBufferA.getTexture() , 1);
+	shaderB.setUniformTexture("tex1", fboBufferB.getTexture() , 2);
 	shaderB.setUniform3f("iResolution", densityWidth, densityHeight, 0);
 	shaderB.setUniform1f("texCoordWidthScale", densityWidth);
 	shaderB.setUniform1f("texCoordHeightScale", densityHeight);
 	shaderB.setUniform1f("iTime", ofGetElapsedTimef());
 	shaderB.setUniform1i("iFrame", ofGetFrameNum());
-	shaderB.setUniformTexture("tex0", fboImage.getTexture() , 1 );
-	shaderB.setUniformTexture("tex1", fboBufferA.getTexture() , 2);
-	shaderB.setUniformTexture("tex2", fboBufferB.getTexture() , 3);
+	
 
-	fboBufferA.draw(0 ,0);
+	fboImage.draw(0 ,0);
 	shaderB.end();
 	
 	fboBufferB.end();
@@ -71,11 +68,10 @@ void ofApp::update(){
 	shaderDraw.setUniform1f("texCoordHeightScale", densityHeight);
 	shaderDraw.setUniform1f("iTime", ofGetElapsedTimef());
 	shaderDraw.setUniform1i("iFrame", ofGetFrameNum());
-	shaderDraw.setUniformTexture("tex0", fboImage.getTexture() , 1 );
-	shaderDraw.setUniformTexture("tex1", fboBufferA.getTexture() , 2);
-	shaderDraw.setUniformTexture("tex2", fboBufferB.getTexture() , 3);
+	shaderDraw.setUniformTexture("tex0", fboBufferA.getTexture() , 1 );
+	shaderDraw.setUniformTexture("tex1", fboBufferB.getTexture() , 2);
 
-	fboBufferB.draw(0 ,0);
+	fboImage.draw(0 ,0);
 	shaderDraw.end();
 	
 	fboImage.end();

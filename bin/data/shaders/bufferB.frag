@@ -95,7 +95,7 @@ void main(){
 	}
 	
 
-	if ((iFrame == 0) || bool(texelFetch(tex2, ivec2(R, 0), 0).x)) {
+	if ((iFrame == 0) ) {
 		col = vec4(0);
 	} else {
 		col = texture(tex1,(gl_FragCoord.xy/iResolution.xy)
@@ -112,7 +112,8 @@ void main(){
 	
 	// col = vec3(texelFetch(iChannel0, ivec2(gl_FragCoord.xy), 0));
 
-	oFragColor= col;
+	oFragColor = col;
+
 	
 //	float noiseVal = 0.5 + 0.5 * Pseudo3dNoise(vec3(pos * 10.0, iTime));
 //	oFragColor.rgb = vec3(noiseVal);

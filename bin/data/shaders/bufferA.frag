@@ -183,7 +183,7 @@ void main(){
 	
 	// the dot gets random position when...
 	// ...pressing r for resetting
-	bool r = bool(texelFetch(tex1, ivec2(R, 0), 0).x);
+	/// bool r = bool(texelFetch(tex1, ivec2(R, 0), 0).x);
 	
 #ifdef RESET_OUTOFBOUND
 	// ...out of bounds
@@ -200,7 +200,8 @@ void main(){
 #endif
 	
 	//bool o = texture(iChannel2, p).x < 0.5;
-	if (r || b || h || iFrame == 0) {
+	// if (r || b || h || iFrame == 0) {
+	if (b || h || iFrame == 0) {
 		// reset position
 		oFragColor = vec4(hash22(uv+fract(iTime))*vec2(iResolution.x/iResolution.y, 1.0), 0.0, 1.0);
 	}
