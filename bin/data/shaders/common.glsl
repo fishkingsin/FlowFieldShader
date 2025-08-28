@@ -77,7 +77,7 @@ float perlin2d(vec2 p) {
 }
 
 // had to define them as macros because iMouse and iResolution are not defined in the "Common" Tab
-#define mouse_to_world(p) (iMouse.xy/iResolution.xy-(p)/vec2(iResolution.x/iResolution.y, 1.0))*vec2(iResolution.x/iResolution.y, 1.0)
+#define mouse_to_world(p) (iMouse.xy/iResolution.xy-(p)/vec2(iResolution.x/texCoordHeightScale, 1.0))*vec2(iResolution.x/texCoordHeightScale, 1.0)
 #if MOUSE == 2
 #define distortion(p) (perlin2d((p).xy * FIELD_SCALE + FIELD_OFFSET)*(clamp(length(mouse_to_world(p)), 0.0,0.4)*2.5-1.)*2.0)
 #elif MOUSE == 1

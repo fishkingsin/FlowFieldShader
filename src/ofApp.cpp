@@ -28,6 +28,7 @@ void ofApp::setup(){
 
 //--------------------------------------------------------------
 void ofApp::update(){
+	frame += 1 ;
 	float dt = 1.0 / max(ofGetFrameRate(), 1.f); // more smooth as 'real' deltaTime.
 	
 	// apply noiseshader to fbo
@@ -37,7 +38,7 @@ void ofApp::update(){
 	shaderA.setUniform1f("texCoordWidthScale", densityWidth);
 	shaderA.setUniform1f("texCoordHeightScale", densityHeight);
 	shaderA.setUniform1f("iTime", ofGetElapsedTimef());
-	shaderA.setUniform1i("iFrame", ofGetFrameNum());
+	shaderA.setUniform1i("iFrame", frame);
 	shaderA.setUniformTexture("tex0", fboBufferA.getTexture() , 1);
 	shaderA.setUniformTexture("tex1", fboBufferB.getTexture() , 2);
 	fboImage.draw(0 ,0);
@@ -53,7 +54,7 @@ void ofApp::update(){
 	shaderB.setUniform1f("texCoordWidthScale", densityWidth);
 	shaderB.setUniform1f("texCoordHeightScale", densityHeight);
 	shaderB.setUniform1f("iTime", ofGetElapsedTimef());
-	shaderB.setUniform1i("iFrame", ofGetFrameNum());
+	shaderB.setUniform1i("iFrame", frame);
 	
 
 	fboImage.draw(0 ,0);
@@ -67,7 +68,7 @@ void ofApp::update(){
 	shaderDraw.setUniform1f("texCoordWidthScale", densityWidth);
 	shaderDraw.setUniform1f("texCoordHeightScale", densityHeight);
 	shaderDraw.setUniform1f("iTime", ofGetElapsedTimef());
-	shaderDraw.setUniform1i("iFrame", ofGetFrameNum());
+	shaderDraw.setUniform1i("iFrame", frame);
 	shaderDraw.setUniformTexture("tex0", fboBufferA.getTexture() , 1 );
 	shaderDraw.setUniformTexture("tex1", fboBufferB.getTexture() , 2);
 
@@ -79,11 +80,13 @@ void ofApp::update(){
 
 //--------------------------------------------------------------
 void ofApp::draw(){
+	
+	
+	fboImage.draw(0, 0, ofGetWindowWidth(), ofGetWindowHeight());
 	int width = windowWidth * 0.25;
 	int height = windowHeight * 0.25;
 	fboBufferA.draw(0, 0, width, height);
 	fboBufferB.draw(width, 0, width, height);
-	fboImage.draw(0, height, width, height);
 }
 
 

@@ -1,25 +1,25 @@
 OF_GLSL_SHADER_HEADER
 // -- tweakable parameters --
 // size of particles
-#define PARTICLE_SIZE 0.004
+#define PARTICLE_SIZE 0.00004
 // amount of particles
-#define PARTICLES 128
+#define PARTICLES 512
 // opacity of particles
 #define OPACITY 1.0
 // step size per frame
 #define STEP_SIZE 0.002
 // scale of the noise function used for the curls
-#define FIELD_SCALE 2.5
+#define FIELD_SCALE 0.8
 // offset of the noise function for variety
 #define FIELD_OFFSET vec2(0, 0)
 // if defined, use curl field else just noise field
 //#define CURL
 // if defined, particles have the given probability to teleport to a random position each frame (the closer to 0 the longer the paths)
-#define RESET_PROB 0.02
+#define RESET_PROB 0.002
 // if 2, the mouseposition modifies the distortion if 1 it doesn't and if 0 it is the only distortion
 #define MOUSE 1
 // if defined, the image appears white with black dots, else, it's the other way around
-#define LIGHT_MODE
+//#define LIGHT_MODE
 // if defined, the particles are reset when out of bounds
 //#define RESET_OUTOFBOUNDS
 // if defined, a subtle blur is added to the older lines.
@@ -126,7 +126,7 @@ uniform sampler2D tex0;
 uniform sampler2D tex1;
 uniform vec3 iResolution;
 uniform float iTime;
-
+uniform int iFrame;
 out vec4 oFragColor;
 
 vec2 GetGradient(vec2 intPos, float t) {
@@ -135,7 +135,7 @@ vec2 GetGradient(vec2 intPos, float t) {
 	float rand = fract(sin(dot(intPos, vec2(12.9898, 78.233))) * 43758.5453);;
 	
 	// Texture-based rand (a bit faster on my GPU)
-//	float rand = texture(tex0, intPos / 64.0).r;
+	//	float rand = texture(tex0, intPos / 64.0).r;
 	
 	// Rotate gradient: random starting rotation, random rotation rate
 	float angle = 6.283185 * rand + 4.0 * t * rand;
@@ -148,17 +148,17 @@ float Pseudo3dNoise(vec3 pos) {
 	vec2 f = pos.xy - i;
 	vec2 blend = f * f * (3.0 - 2.0 * f);
 	float noiseVal =
+	mix(
 		mix(
-			mix(
-				dot(GetGradient(i + vec2(0, 0), pos.z), f - vec2(0, 0)),
-				dot(GetGradient(i + vec2(1, 0), pos.z), f - vec2(1, 0)),
-				blend.x),
-			mix(
-				dot(GetGradient(i + vec2(0, 1), pos.z), f - vec2(0, 1)),
-				dot(GetGradient(i + vec2(1, 1), pos.z), f - vec2(1, 1)),
-				blend.x),
+			dot(GetGradient(i + vec2(0, 0), pos.z), f - vec2(0, 0)),
+			dot(GetGradient(i + vec2(1, 0), pos.z), f - vec2(1, 0)),
+			blend.x),
+		mix(
+			dot(GetGradient(i + vec2(0, 1), pos.z), f - vec2(0, 1)),
+			dot(GetGradient(i + vec2(1, 1), pos.z), f - vec2(1, 1)),
+			blend.x),
 		blend.y
-	);
+		);
 	return noiseVal / 0.7; // normalize to about [-1..1]
 }
 
@@ -167,13 +167,22 @@ void main(){
 	pos.x /= texCoordWidthScale;
 	pos.y /= texCoordHeightScale;
 	vec2 uv = (gl_FragCoord.xy/iResolution.xy);
-	vec4 col = texture(tex1, uv);
+	//    vec4 col = 0.1+0.8*texture(iChannel0,uv);
+	vec4 col = texture(tex1,uv);
 	col = pow(col, vec4(1.5));
+
+#ifdef LIGHT_MODE
+	col = (1.-col);
+#endif
 	uv = gl_FragCoord.xy/iResolution.xy-0.5;
-	oFragColor = col;
+	oFragColor = col
+#ifdef VIGNETTE
+	*(1.-0.5*dot(uv,uv))
+#endif
+	;
 	
-//	float noiseVal = 0.5 + 0.5 * Pseudo3dNoise(vec3(pos * 10.0, iTime));
-//	oFragColor.rgb = vec3(noiseVal);
-//	oFragColor.a = 1;
+	//	float noiseVal = 0.5 + 0.5 * Pseudo3dNoise(vec3(pos * 10.0, iTime));
+	//	oFragColor.rgb = vec3(noiseVal);
+		oFragColor.a = 1;
 	
 }

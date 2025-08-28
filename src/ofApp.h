@@ -45,5 +45,5 @@ private:
 	ofFbo fboBufferA; // with alpha
 	
 	ofFbo fboImage; // with alpha
-	
+	int frame = 0;
 };

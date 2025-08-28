@@ -1,26 +1,26 @@
 OF_GLSL_SHADER_HEADER
-
 // -- tweakable parameters --
 // size of particles
-#define PARTICLE_SIZE 0.004
+#define PARTICLE_SIZE 0.000004
 // amount of particles
-#define PARTICLES 128
+#define PARTICLES 512
 // opacity of particles
 #define OPACITY 1.0
 // step size per frame
 #define STEP_SIZE 0.002
 // scale of the noise function used for the curls
-#define FIELD_SCALE 2.5
+#define FIELD_SCALE 0.1999
+#define SPEED 0.0199
 // offset of the noise function for variety
 #define FIELD_OFFSET vec2(0, 0)
 // if defined, use curl field else just noise field
 //#define CURL
 // if defined, particles have the given probability to teleport to a random position each frame (the closer to 0 the longer the paths)
-#define RESET_PROB 0.02
+#define RESET_PROB 0.002
 // if 2, the mouseposition modifies the distortion if 1 it doesn't and if 0 it is the only distortion
 #define MOUSE 1
 // if defined, the image appears white with black dots, else, it's the other way around
-#define LIGHT_MODE
+//#define LIGHT_MODE
 // if defined, the particles are reset when out of bounds
 //#define RESET_OUTOFBOUNDS
 // if defined, a subtle blur is added to the older lines.
@@ -88,7 +88,7 @@ float perlin2d(vec2 p) {
 #define distortion(p) (clamp(length(mouse_to_world(p)), 0.0, 0.5)*2.-.5)
 #endif
 
-#define EPS 0.0001
+#define EPS 0.00001
 #ifdef CURL
 // the raw code of this function is commented out at the bottom (curl())
 #define field(p) normalize(vec2((distortion((p) + vec2(0,EPS)) - distortion((p) - vec2(0,EPS)))/(2.0 * EPS), -(distortion((p) + vec2(EPS,0)) - distortion((p) - vec2(EPS,0)))/(2.0 * EPS)))*4.0
@@ -169,21 +169,24 @@ void main(){
 	pos.x /= texCoordWidthScale;
 	pos.y /= texCoordHeightScale;
 	
-	vec2 uv = (gl_FragCoord.xy/iResolution.y);
-
-	int n = posToIdx(ivec2(gl_FragCoord), int(iResolution.y));
+	vec2 uv = gl_FragCoord.xy/iResolution.y;
+	
+	int n = posToIdx(ivec2(gl_FragCoord.xy), int(iResolution.y));
+	
+	
 	// position of dot
-	vec2 p = texelFetch(tex0, ivec2(gl_FragCoord), 0).xy;
+	vec2 p = texelFetch(tex0, ivec2(gl_FragCoord.xy), 0).xy;
 #ifdef CURL
-	p += field(p)*STEP_SIZE/FIELD_SCALE;
+	p += (field(p)*STEP_SIZE/FIELD_SCALE) * SPEED;
 #else
-	p += field(p)*STEP_SIZE;
+	p += (field(p)*STEP_SIZE) * SPEED;
 #endif
 	oFragColor = vec4(p,0.0,1.0);
 	
 	// the dot gets random position when...
 	// ...pressing r for resetting
-	/// bool r = bool(texelFetch(tex1, ivec2(R, 0), 0).x);
+	// key press
+	bool r = bool(texelFetch(tex2, ivec2(R, 0), 0).x);
 	
 #ifdef RESET_OUTOFBOUND
 	// ...out of bounds
@@ -200,13 +203,17 @@ void main(){
 #endif
 	
 	//bool o = texture(iChannel2, p).x < 0.5;
-	// if (r || b || h || iFrame == 0) {
-	if (b || h || iFrame == 0) {
+	if (
+//		r ||
+//		b ||
+		h ||
+		iFrame == 0
+		) {
 		// reset position
 		oFragColor = vec4(hash22(uv+fract(iTime))*vec2(iResolution.x/iResolution.y, 1.0), 0.0, 1.0);
 	}
 	
 //	float noiseVal = 0.5 + 0.5 * Pseudo3dNoise(vec3(pos * 10.0, iTime));
 //	oFragColor.rgb = vec3(noiseVal);
-//	oFragColor.a = 1;
+	oFragColor.a = 1;
 }
